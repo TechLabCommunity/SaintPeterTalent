@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<main>
+    <db>
+        <user>root</user>
+        <passwd>root</passwd>
+        <host>localhost</host>
+        <db>TalentDB</db>
+        <port>3306</port>
+    </db>
+</main>
