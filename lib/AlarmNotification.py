@@ -10,7 +10,7 @@ class AlarmAction(IntEnum):
 
 class AlarmNotification(Telnet):
 
-    TIMEOUT = 5
+    TIMEOUT = 3
     is_open = False
 
     def __init__(self, name):

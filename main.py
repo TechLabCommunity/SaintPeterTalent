@@ -15,17 +15,30 @@ def find_usb_wiegand():
 wiegand_port = find_usb_wiegand()
 while True:
     try:
-        with serial.Serial(wiegand_port, 9600) as ser:
-            x = ser.readline().strip().decode('utf-8')
-            code = ''
-            if x:
-                part = x.partition('#')
-                if len(part) > 0:
-                    code = part[0]
-                    system_alarm = SPControl()
-                    res = system_alarm.enter_code(code)
-                    print(res)
-                    alarm_status = res[7]
+        with serial.Serial(wiegand_port, 9600) as wiegand:
+            x = wiegand.readline().strip().decode('utf-8')
+        code = ''
+        status_alarm = True
+        if x:
+            part = x.partition('#')
+            if len(part) > 0:
+                code = part[0]
+                print(code)
+                system_alarm = SPControl()
+                res = system_alarm.enter_code(code)
+                print(res)
+                alarm_status = res[7]
+                is_good = res[5]
+                char_send = b'b'
+                talent_code = res[2]
+                if talent_code is not None:
+                    if is_good:
+                        char_send = b'a'
+                    else:
+                        char_send = b'c'
+                with serial.Serial(wiegand_port, 9600) as wiegand:
+                    wiegand.write(char_send)
+                try:
                     if alarm_status != TypeAlarmAction.NOTHING:
                         what_to_do = AlarmAction.DEACTIVATE
                         alarm_connection = AlarmNotification('ALARM_TL')
@@ -37,6 +50,8 @@ while True:
                             print('Deactivate alarm')
                         res_alarm = alarm_connection.send_what_to_do(what_to_do)
                         print(res_alarm)
+                except:
+                    print("res alarm no connection")
     except:
         found_usb = False
         while not found_usb:
