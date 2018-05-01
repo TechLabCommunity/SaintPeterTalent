@@ -3,12 +3,13 @@ import serial
 from enum import Enum
 from lib.SPControl import SPControl,TypeAlarmAction, TypeEnter
 from lib.AlarmNotification import AlarmNotification, AlarmAction
+from lib.AccessLogger import AccessLogger
 
 class TypeResult(Enum):
     OKCODEENTER = b's',
     OKCODEEXIT = b'a',
-    NOCODE = b'c',
-    OKCODEBSW = b'b'
+    NOCODE = b'b',
+    OKCODEBSW = b'c'
 
 #function to find first arduino's first usb port.
 
@@ -48,7 +49,8 @@ def get_wiegand_serial():
             pass
     return w_serial
 
-
+app_log = AccessLogger('./log/log.txt')
+wiegand_serial = get_wiegand_serial()
 while True:
     try:
         x = wiegand_serial.readline().strip().decode('utf-8')
@@ -56,25 +58,33 @@ while True:
         if x:
             part = x.partition('#')
             if len(part) > 0:
+                app_log.log('CREATE STREAM')
                 code = part[0]
-                print(code)
+                app_log.log("Insert code : "+code)
                 system_alarm = SPControl()
-                _, _, talent_code, _, _, is_good, type_enter, alarm_status, __ = system_alarm.enter_code(code)
-                char_send = TypeResult.OKCODEBSW.value
+                name, surname, talent_code, _, _, is_good, type_enter, alarm_status, __ = system_alarm.enter_code(code)
+                app_log.log('Access member : %(talent_code)s, %(name)s, %(surname)s' % {'talent_code' : str(talent_code), 'name' : str(name), 'surname' : str(surname)})
+                char_send = TypeResult.NOCODE.value[0]
                 if talent_code is not None:
                     if is_good:
                         if type_enter == TypeEnter.ENTER:
+                            app_log.log('Enter Mode')
                             char_send = TypeResult.OKCODEENTER.value[0]
                         else:
+                            app_log.log('Exit Mode')
                             char_send = TypeResult.OKCODEEXIT.value[0]
                     else:
-                        char_send = TypeResult.NOCODE.value[0]
+                        app_log.log('Code Valid but there\'s anomaly')
+                        char_send = TypeResult.OKCODEBSW.value
+                else:
+                    app_log.log('No code valid')
                 wiegand_serial.write(char_send)
-                print(char_send)
                 try:
                     set_alarms(alarm_status)
+                    app_log.log(str(alarm_status))
                 except:
-                    print("res alarm no connection")
+                    app_log.log('ALARM NOT WORKING')
+                app_log.log('END STREAM')
     except:
         wiegand_serial = get_wiegand_serial()
         pass
