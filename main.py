@@ -1,11 +1,12 @@
 import glob
 import serial
 from enum import Enum
-from lib.SPControl import SPControl,TypeAlarmAction
+from lib.SPControl import SPControl,TypeAlarmAction, TypeEnter
 from lib.AlarmNotification import AlarmNotification, AlarmAction
 
 class TypeResult(Enum):
-    OKCODE = b'a',
+    OKCODEENTER = b's',
+    OKCODEEXIT = b'a',
     NOCODE = b'c',
     OKCODEBSW = b'b'
 
@@ -58,11 +59,14 @@ while True:
                 code = part[0]
                 print(code)
                 system_alarm = SPControl()
-                _, _, talent_code, _, _, is_good, _, alarm_status, __ = system_alarm.enter_code(code)
+                _, _, talent_code, _, _, is_good, type_enter, alarm_status, __ = system_alarm.enter_code(code)
                 char_send = TypeResult.OKCODEBSW.value
                 if talent_code is not None:
                     if is_good:
-                        char_send = TypeResult.OKCODE.value[0]
+                        if type_enter == TypeEnter.ENTER:
+                            char_send = TypeResult.OKCODEENTER.value[0]
+                        else:
+                            char_send = TypeResult.OKCODEEXIT.value[0]
                     else:
                         char_send = TypeResult.NOCODE.value[0]
                 wiegand_serial.write(char_send)

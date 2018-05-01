@@ -49,16 +49,18 @@ void loop() {
       case 'b':
         digitalWrite(PINS[1], LOW);
         count_res++;
-      case 'a':
-        digitalWrite(PINS[2], LOW);
+      case 's':
         count_res++;
         if (count_res == 1){
           digitalWrite(DOOR_PIN, HIGH);
         }
         count_res = 0;
+      case 'a':
+        digitalWrite(PINS[2], LOW);
         MsTimer2::start();
         break;
     }
   }
+  Serial.flush();
   code = -1;
 }
