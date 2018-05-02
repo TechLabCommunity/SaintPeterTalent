@@ -52,7 +52,6 @@ def get_wiegand_serial():
 app_log = AccessLogger('./log/log.txt')
 wiegand_serial = get_wiegand_serial()
 while True:
-    try:
         x = wiegand_serial.readline().strip().decode('utf-8')
         code = ''
         if x:
@@ -85,6 +84,5 @@ while True:
                 except:
                     app_log.log('ALARM NOT WORKING')
                 app_log.log('END STREAM')
-    except:
         wiegand_serial = get_wiegand_serial()
         pass
