@@ -37,6 +37,7 @@ def get_wiegand_serial():
         usbports = glob.glob("/dev/ttyUSB*")
         if len(usbports) > 0:
             port = usbports[0]
+            print(port)
         else:
             return None, False
         return port, True
@@ -53,6 +54,8 @@ app_log = AccessLogger('./log/log.txt')
 wiegand_serial = get_wiegand_serial()
 while True:
     try:
+        if wiegand_serial.in_waiting() < 1:
+            pass
         x = wiegand_serial.readline().strip().decode('utf-8')
         code = ''
         if x:
@@ -86,5 +89,6 @@ while True:
                     app_log.log('ALARM NOT WORKING')
                 app_log.log('END STREAM')
     except:
+        print("Serial failed.")
         wiegand_serial = get_wiegand_serial()
         pass

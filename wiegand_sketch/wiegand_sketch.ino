@@ -1,13 +1,18 @@
 #include <MsTimer2.h>
 #include <Wiegand.h>
+#include <avr/io.h>
+#include <avr/wdt.h>
 #define N_PINS 3
 #define DOOR_PIN 12
+#define TIMES_TO_RESET 40
+#define Reset_AVR() wdt_enable(WDTO_30MS); while(1) {} 
 
 
 const unsigned PINS[N_PINS] = {4,5,6};
 WIEGAND wg;
 long code = -1;
 volatile unsigned int count_res = 0;
+unsigned int input_times = 0;
 
 void turn_off(){
   for (int i=0; i<N_PINS; i++){
@@ -38,9 +43,13 @@ void loop() {
     if (code > 0) {
       Serial.println(String(code) + "#");
     }
-
-  }
-  if (Serial.available()){
+    Serial.flush();
+    input_times++;
+    if (input_times >= TIMES_TO_RESET){
+      input_times = 0;
+      Reset_AVR();
+    }
+  }else if (Serial.available()){
     char c = (char)Serial.read();
     switch(c){
       case 'c':
@@ -61,6 +70,5 @@ void loop() {
         break;
     }
   }
-  Serial.flush();
   code = -1;
 }
