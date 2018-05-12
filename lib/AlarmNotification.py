@@ -1,5 +1,6 @@
 from telnetlib import Telnet
 from lib.AbstractSQL import AbstractSQL
+from lib.SPDbCall import TypeAlarmAction
 from enum import IntEnum
 import json
 
@@ -70,6 +71,17 @@ class AlarmNotification(Telnet):
     def close(self):
         self.is_open = False
         super().close()
+
+    # actually there's only one alarm.
+    def set_alarms(self, status):
+        if status != TypeAlarmAction.NOTHING:
+            what_to_do = AlarmAction.DEACTIVATE
+            if status == TypeAlarmAction.ACTIVATE:
+                what_to_do = AlarmAction.ACTIVATE
+            elif status == TypeAlarmAction.DEACTIVATE:
+                what_to_do = AlarmAction.DEACTIVATE
+            return self.send_what_to_do(what_to_do)
+        return False
 
     @staticmethod
     def get_info_alarm(name):
