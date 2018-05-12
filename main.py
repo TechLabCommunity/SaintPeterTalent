@@ -36,7 +36,8 @@ def get_wiegand_serial():
 
 #todo get all alarms with status.
 def launch_status_alarm():
-    threading.Timer(5.0, launch_status_alarm).start()
+    #TODO: config static class for parameter.
+    threading.Timer(300, launch_status_alarm).start()
     try:
         AlarmNotification('ALARM_TL').register_status()
     except:
