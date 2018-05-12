@@ -44,11 +44,9 @@ class SPControl:
 
     @staticmethod
     def check_dependence(depending_on, member_type, type_enter):
+        if len(depending_on) == 1 and depending_on[0] == -1:
+            return True
         if type_enter == TypeEnter.ENTER:
-            if len(depending_on) == 1 and depending_on[0] == -1:
-                return True
             return SPDbCall.n_type_user(depending_on) > 0
         else:
-            if len(depending_on) == 1 and not depending_on[0] == -1:
-                return True
             return SPDbCall.n_type_user(SPDbCall.all_dependent_by(member_type)) == 0 or SPDbCall.n_type_user((member_type,)) > 1
