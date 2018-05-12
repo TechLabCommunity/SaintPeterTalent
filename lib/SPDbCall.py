@@ -90,3 +90,9 @@ class SPDbCall:
         AbstractSQL.execute_commit(query, (talent_code, member_type, int(is_enter), int(alarm_activation)))
         return True
 
+    @staticmethod
+    def empty_jail():
+        query = AbstractSQL.get_query_by_name('TRUNCATE_ONLINE_MEMBERS')
+        AbstractSQL.execute_commit(query, ())
+        return True
+

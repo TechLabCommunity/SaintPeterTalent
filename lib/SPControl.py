@@ -1,12 +1,23 @@
 from lib.SPDbCall import SPDbCall
 from lib.SPDbCall import TypeAlarmAction
 from lib.SPDbCall import TypeEnter
+import xml.etree.ElementTree as ET
 
 
 class SPControl:
 
+    PATH_CONFIG = 'lib/config.xml'
+
+    @staticmethod
+    def get_code_empty_jail():
+        return ET.parse(SPControl.PATH_CONFIG).getroot()[1].find('code').text
+
     def enter_code(self, access_code):
         #retrieve user's data
+        if access_code == SPControl.get_code_empty_jail():
+            SPDbCall.empty_jail()
+            #TODO: set empty jail like member.
+            return 'EMPTY', 'JAIL', 'EMPTYJAIL', 4, '-1', True, TypeEnter.EXIT,  TypeAlarmAction.ACTIVATE, 0
         name, surname, talent_code, member_type, depending_on = SPDbCall.get_info_user(access_code)
         alarm_action = TypeAlarmAction.NOTHING
         type_enter = TypeEnter.NOTHING
@@ -40,4 +51,4 @@ class SPControl:
         else:
             if len(depending_on) == 1 and not depending_on[0] == -1:
                 return True
-            return SPDbCall.n_type_user(SPDbCall.all_dependent_by(member_type)) == 0
+            return SPDbCall.n_type_user(SPDbCall.all_dependent_by(member_type)) == 0 or SPDbCall.n_type_user((member_type,)) > 1

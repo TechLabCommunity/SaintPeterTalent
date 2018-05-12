@@ -7,4 +7,7 @@
         <db>talentla_gestionale</db>
         <port>3306</port>
     </db>
+    <emptyjail>
+        <code>9877890</code>
+    </emptyjail>
 </main>
