@@ -74,7 +74,7 @@ def launch_sp():
                         app_log.log('No code valid')
                     wiegand_serial.write(char_send)
                     try:
-                        #AlarmNotification('ALARM_TL').set_alarms(alarm_status)
+                        AlarmNotification('ALARM_TL').set_alarms(alarm_status)
                         app_log.log(str(alarm_status))
                     except:
                         app_log.log('ALARM NOT WORKING')
