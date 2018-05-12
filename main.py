@@ -4,6 +4,7 @@ from enum import Enum
 from lib.SPControl import SPControl,TypeAlarmAction, TypeEnter
 from lib.AlarmNotification import AlarmNotification, AlarmAction
 from lib.AccessLogger import AccessLogger
+from time import sleep
 
 class TypeResult(Enum):
     OKCODEENTER = b's',
@@ -45,7 +46,7 @@ def get_wiegand_serial():
         try:
             while not was_found:
                     w_port, was_found = find_usb_wiegand()
-            w_serial = serial.Serial(w_port, 9600)
+            w_serial = serial.Serial(w_port, 9600, timeout=0.2)
         except:
             pass
     return w_serial
@@ -54,8 +55,6 @@ app_log = AccessLogger('./log/log.txt')
 wiegand_serial = get_wiegand_serial()
 while True:
     try:
-        if wiegand_serial.in_waiting() < 1:
-            pass
         x = wiegand_serial.readline().strip().decode('utf-8')
         code = ''
         if x:
@@ -90,5 +89,6 @@ while True:
                 app_log.log('END STREAM')
     except:
         print("Serial failed.")
+        sleep(3)
         wiegand_serial = get_wiegand_serial()
         pass
