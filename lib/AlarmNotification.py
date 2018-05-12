@@ -1,5 +1,6 @@
 from telnetlib import Telnet
 from lib.AbstractSQL import AbstractSQL
+from lib.SPDbCall import TypeAlarmAction
 from enum import IntEnum
 import json
 
@@ -16,6 +17,8 @@ class AlarmNotification(Telnet):
     def __init__(self, name):
         self.name = name
         self.token, host, port = self.get_info_alarm(name)
+        if self.is_open:
+            raise PermissionError('Alarm is busy')
         try:
             super().__init__(host, port, self.TIMEOUT)
             self.is_open = True
@@ -70,6 +73,17 @@ class AlarmNotification(Telnet):
     def close(self):
         self.is_open = False
         super().close()
+
+    # actually there's only one alarm.
+    def set_alarms(self, status):
+        if status != TypeAlarmAction.NOTHING:
+            what_to_do = AlarmAction.DEACTIVATE
+            if status == TypeAlarmAction.ACTIVATE:
+                what_to_do = AlarmAction.ACTIVATE
+            elif status == TypeAlarmAction.DEACTIVATE:
+                what_to_do = AlarmAction.DEACTIVATE
+            return self.send_what_to_do(what_to_do)
+        return False
 
     @staticmethod
     def get_info_alarm(name):

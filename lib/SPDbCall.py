@@ -87,6 +87,8 @@ class SPDbCall:
         if talent_code is None or member_type is None:
             return False
         query = AbstractSQL.get_query_by_name('SAVE_LOG')
+        if alarm_activation is None:
+            alarm_activation = TypeAlarmAction.NOTHING
         AbstractSQL.execute_commit(query, (talent_code, member_type, int(is_enter), int(alarm_activation)))
         return True
 
