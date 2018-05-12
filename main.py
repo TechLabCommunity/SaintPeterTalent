@@ -1,3 +1,4 @@
+#!/usr/bin/env python3.5
 import glob
 import serial
 from enum import Enum
