@@ -1,9 +1,12 @@
 import logging
+import os
 from logging.handlers import RotatingFileHandler
 
 class AccessLogger:
 
     def __init__(self, filename):
+        if not os.path.exists('./log'):
+            os.makedirs('./log')
         log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s')
         logFile = filename
         my_handler = RotatingFileHandler(logFile, mode='a', maxBytes=10**7, encoding=None, delay=0)

@@ -34,22 +34,12 @@ def get_wiegand_serial():
             pass
     return w_serial
 
-#todo get all alarms with status.
-def launch_status_alarm():
-    #TODO: config static class for parameter.
-    threading.Timer(300, launch_status_alarm).start()
-    try:
-        AlarmNotification('ALARM_TL').register_status()
-    except:
-        pass
-
 def launch_sp():
     app_log = AccessLogger('./log/log.txt')
     wiegand_serial = get_wiegand_serial()
     while True:
         try:
             x = wiegand_serial.readline().strip().decode('utf-8')
-            code = ''
             if x:
                 part = x.partition('#')
                 if len(part) > 0:
@@ -88,4 +78,3 @@ def launch_sp():
 
 main_thread = threading.Thread(target=launch_sp)
 main_thread.start()
-launch_status_alarm()
