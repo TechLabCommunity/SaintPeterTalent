@@ -17,6 +17,8 @@ class AlarmNotification(Telnet):
     def __init__(self, name):
         self.name = name
         self.token, host, port = self.get_info_alarm(name)
+        if self.is_open:
+            raise PermissionError('Alarm is busy')
         try:
             super().__init__(host, port, self.TIMEOUT)
             self.is_open = True
