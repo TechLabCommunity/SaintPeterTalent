@@ -98,3 +98,52 @@ class SPDbCall:
         AbstractSQL.execute_commit(query, ())
         return True
 
+    @staticmethod
+    def insert_request_access(accesscode):
+        if not accesscode or accesscode is None:
+            return False
+        query = AbstractSQL.get_query_by_name('INSERT_REQUEST_ACCESS')
+        AbstractSQL.execute_commit(query, (accesscode,))
+        return True
+
+    @staticmethod
+    def get_next_request():
+        query = AbstractSQL.get_query_by_name('GET_NEXT_REQUEST_ACCESS')
+        row = AbstractSQL.fetch_execute_one(query, ())
+        if row is None:
+            return None, None
+        return int(row[0]), str(row[1])
+
+    @staticmethod
+    def set_request_done(id):
+        query = AbstractSQL.get_query_by_name('SET_REQUEST_DONE')
+        try:
+            AbstractSQL.execute_commit(query, (int(id),))
+            return True
+        except:
+            return False
+
+    @staticmethod
+    def insert_request_serial(stringtosend):
+        if not stringtosend or stringtosend is None:
+            return False
+        query = AbstractSQL.get_query_by_name('INSERT_REQUEST_SERIAL')
+        AbstractSQL.execute_commit(query, (stringtosend,))
+        return True
+
+    @staticmethod
+    def get_next_serial_request():
+        query = AbstractSQL.get_query_by_name('GET_NEXT_STRINGTOSEND')
+        row = AbstractSQL.fetch_execute_one(query, ())
+        if row is None:
+            return None, None
+        return int(row[0]), str(row[1])
+
+    @staticmethod
+    def set_serial_request_done(id):
+        query = AbstractSQL.get_query_by_name('SET_REQUEST_SERIAL_DONE')
+        try:
+            AbstractSQL.execute_commit(query, (int(id),))
+            return True
+        except:
+            return False
