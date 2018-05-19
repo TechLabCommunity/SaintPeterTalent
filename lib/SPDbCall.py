@@ -147,3 +147,47 @@ class SPDbCall:
             return True
         except:
             return False
+
+    @staticmethod
+    def insert_request_alarm(alarm_name, alarm_action):
+        if alarm_name is None or not alarm_name:
+            return False
+        query = AbstractSQL.get_query_by_name('INSERT_ALARM_REQUEST')
+        AbstractSQL.execute_commit(query, (int(alarm_action),alarm_name))
+        return True
+
+    @staticmethod
+    def get_next_alarm_request():
+        query = AbstractSQL.get_query_by_name('GET_NEXT_ALARM_REQUEST')
+        row = AbstractSQL.fetch_execute_one(query, ())
+        if row is None:
+            return None, None, None
+        return int(row[0]), str(row[1]), TypeAlarmAction(int(row[2]))
+
+    @staticmethod
+    def set_alarm_request_done(id):
+        query = AbstractSQL.get_query_by_name('SET_ALARM_REQUEST_DONE')
+        try:
+            AbstractSQL.execute_commit(query, (int(id),))
+            return True
+        except:
+            return False
+
+    @staticmethod
+    def get_info_alarm(name):
+        query = AbstractSQL.get_query_by_name('GET_INFO_ALARM')
+        row = AbstractSQL.fetch_execute_one(query, (name,))
+        return row[0], row[1], row[2]
+
+    @staticmethod
+    def get_insert_query():
+        return AbstractSQL.get_query_by_name('LOG_STATUS_REGISTER_ALARM')
+
+    @staticmethod
+    def get_all_alarms():
+        query = AbstractSQL.get_query_by_name('GET_ALL_INFO_ALARMS')
+        rows = AbstractSQL.fetch_execute_all(query, ())
+        return rows
+
+
+
