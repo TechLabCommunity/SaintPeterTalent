@@ -2,17 +2,20 @@
 import glob
 import serial
 from enum import Enum
-from lib.SPControl import SPControl,TypeAlarmAction, TypeEnter
-from lib.AlarmNotification import AlarmNotification, AlarmAction
+from lib.SPControl import SPControl, TypeEnter, TypeAlarmAction
+from lib.AlarmNotification import AlarmNotification
 from lib.AccessLogger import AccessLogger
 from time import sleep
 import threading
+from lib.SPDbCall import SPDbCall
 
 class TypeResult(Enum):
     OKCODEENTER = b's',
     OKCODEEXIT = b'a',
     NOCODE = b'b',
     OKCODEBSW = b'c'
+
+PATH_LOG = './log/log.txt'
 
 def get_wiegand_serial():
     was_found = False
@@ -35,8 +38,18 @@ def get_wiegand_serial():
             pass
     return w_serial
 
-def launch_sp():
-    app_log = AccessLogger('./log/log.txt')
+def launch_alarm():
+    while True:
+        id, name_alarm, alarm_action = SPDbCall.get_next_alarm_request()
+        if id is not None and alarm_action is not TypeAlarmAction.NOTHING:
+            try:
+                SPDbCall.set_alarm_request_done(id)
+                AlarmNotification(name_alarm).set_alarms(alarm_action)
+            except:
+                pass
+        sleep(0.1)
+
+def launch_serial():
     wiegand_serial = get_wiegand_serial()
     while True:
         try:
@@ -44,38 +57,48 @@ def launch_sp():
             if x:
                 part = x.partition('#')
                 if len(part) > 0:
-                    app_log.log('CREATE STREAM')
                     code = part[0]
-                    app_log.log("Insert code : "+code)
-                    system_alarm = SPControl()
-                    name, surname, talent_code, _, _, is_good, type_enter, alarm_status, __ = system_alarm.enter_code(code)
-                    app_log.log('Access member : %(talent_code)s, %(name)s, %(surname)s' % {'talent_code' : str(talent_code), 'name' : str(name), 'surname' : str(surname)})
-                    char_send = TypeResult.NOCODE.value[0]
-                    if talent_code is not None:
-                        if is_good:
-                            if type_enter == TypeEnter.ENTER:
-                                app_log.log('Enter Mode')
-                                char_send = TypeResult.OKCODEENTER.value[0]
-                            else:
-                                app_log.log('Exit Mode')
-                                char_send = TypeResult.OKCODEEXIT.value[0]
-                        else:
-                            app_log.log('Code Valid but there\'s anomaly')
-                            char_send = TypeResult.OKCODEBSW.value
-                    else:
-                        app_log.log('No code valid')
-                    wiegand_serial.write(char_send)
-                    try:
-                        AlarmNotification('ALARM_TL').set_alarms(alarm_status)
-                        app_log.log(str(alarm_status))
-                    except:
-                        app_log.log('ALARM NOT WORKING')
-                    app_log.log('END STREAM')
+                    SPDbCall.insert_request_access(code)
+            id, stos = SPDbCall.get_next_serial_request()
+            if id is not None:
+                SPDbCall.set_serial_request_done(id)
+                wiegand_serial.write(str.encode(stos))
         except:
-            app_log.log("Serial failed.")
             sleep(3)
             wiegand_serial = get_wiegand_serial()
             pass
 
-main_thread = threading.Thread(target=launch_sp)
+
+def launch_main():
+    logger = AccessLogger(PATH_LOG)
+    while True:
+        try:
+            id, code = SPDbCall.get_next_request()
+            if id is not None:
+                SPDbCall.set_request_done(id)
+                system_access = SPControl()
+                name, surname, talent_code, _, _, is_good, type_enter, alarm_status, __ = system_access.enter_code(code)
+                if talent_code is not None:
+                    if is_good:
+                        if type_enter == TypeEnter.ENTER:
+                            char_send = TypeResult.OKCODEENTER.value[0]
+                        else:
+                            char_send = TypeResult.OKCODEEXIT.value[0]
+                    else:
+                        char_send = TypeResult.OKCODEBSW.value
+                    logger.log('%s, %s, %s, %s, %s' % (name, surname, talent_code, type_enter, code))
+                    SPDbCall.insert_request_serial(char_send)
+                    logger.log('Alarm action : '+str(alarm_status))
+                    if alarm_status is not TypeAlarmAction.NOTHING:
+                        for al in SPDbCall.get_all_alarms():
+                            SPDbCall.insert_request_alarm(str(al[0]), alarm_status)
+            sleep(0.1)
+        except Exception as e:
+            logger.log("Exception : "+str(e))
+
+main_thread = threading.Thread(target=launch_main)
+serial_thread = threading.Thread(target=launch_serial)
+alarm_thread = threading.Thread(target=launch_alarm)
+serial_thread.start()
 main_thread.start()
+alarm_thread.start()
