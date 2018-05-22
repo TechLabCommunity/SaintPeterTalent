@@ -87,14 +87,12 @@ def launch_main():
                     else:
                         char_send = TypeResult.OKCODEBSW.value
                     logger.log('%s, %s, %s, %s, %s' % (name, surname, talent_code, type_enter, code))
-                    if is_good:
-                        SPDbCall.insert_request_serial(char_send)
-                        logger.log('Alarm action : '+str(alarm_status))
-                        if alarm_status is not TypeAlarmAction.NOTHING:
-                            for al in SPDbCall.get_all_alarms():
-                                SPDbCall.insert_request_alarm(str(al[0]), alarm_status)
-                    else:
-                        logger.log('Code valid but there is anomaly : ' + str(member_type))
+                    SPDbCall.insert_request_serial(char_send)
+                    logger.log('Alarm action : '+str(alarm_status))
+                    if alarm_status is not TypeAlarmAction.NOTHING:
+                        for al in SPDbCall.get_all_alarms():
+                            SPDbCall.insert_request_alarm(str(al[0]), alarm_status)
+                    logger.log('Code valid but there is anomaly : ' + str(member_type))
             sleep(0.1)
         except Exception as e:
             logger.log("Exception : "+str(e))
