@@ -1,7 +1,6 @@
 venv/
 
 \.idea/
-log/
 log/*
 
 lib/__pycache__/
