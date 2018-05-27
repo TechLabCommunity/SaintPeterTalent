@@ -4,6 +4,5 @@ venv/
 log/*
 
 lib/__pycache__/
-mod/__pycache__/
-module/
+module/__pycache__/
 loadfile/*

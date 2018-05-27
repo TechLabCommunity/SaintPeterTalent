@@ -11,6 +11,7 @@
         <code>9877890</code>
     </emptyjail>
     <socketconf>
+        <host>127.0.0.1</host>
         <port>6113</port>
         <tokenkey>178e9e6d04c9c1bd3c831f089eb726ff</tokenkey>
     </socketconf>
