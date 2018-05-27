@@ -34,6 +34,7 @@ class SpmSocketJSON(Thread):
                 data = conn.recv(1024).decode("utf-8").strip()
                 json_rec = json.loads(data)
                 print(json_rec)
+                #TODO
                 conn.close()
                 print("Client close")
                 break
