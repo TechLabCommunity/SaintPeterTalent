@@ -4,3 +4,4 @@ venv/
 log/*
 
 lib/__pycache__/
+mod/__pycache__/
