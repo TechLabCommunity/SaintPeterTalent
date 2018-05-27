@@ -10,4 +10,8 @@
     <emptyjail>
         <code>9877890</code>
     </emptyjail>
+    <socketconf>
+        <port>6113</port>
+        <tokenkey>178e9e6d04c9c1bd3c831f089eb726ff</tokenkey>
+    </socketconf>
 </main>
