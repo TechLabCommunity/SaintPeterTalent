@@ -31,7 +31,7 @@ class SpmMain(Thread):
                     system_access = SPControl()
                     name, surname, talent_code, member_type, _, is_good, type_enter, alarm_status, __ = system_access.enter_code(
                         code)
-                    char_send = TypeResult.NOCODE
+                    char_send = TypeResult.NOCODE.value[0]
                     if talent_code is not None:
                         if is_good:
                             if type_enter == TypeEnter.ENTER:

@@ -6,3 +6,4 @@ log/*
 lib/__pycache__/
 module/__pycache__/
 loadfile/*
+__pycache__/
