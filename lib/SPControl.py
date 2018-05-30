@@ -1,16 +1,13 @@
 from lib.SPDbCall import SPDbCall
 from lib.SPDbCall import TypeAlarmAction
 from lib.SPDbCall import TypeEnter
-import xml.etree.ElementTree as ET
-
+from Global import *
 
 class SPControl:
 
-    PATH_CONFIG = 'lib/config.xml'
-
     @staticmethod
     def get_code_empty_jail():
-        return ET.parse(SPControl.PATH_CONFIG).getroot()[1].find('code').text
+        return get_value_config('emptyjail', 'code')
 
     def enter_code(self, access_code):
         #retrieve user's data

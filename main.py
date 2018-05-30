@@ -1,11 +1,10 @@
 #!/usr/bin/env python3.5
-from module.SpmSerial import SpmSerial
 from module.SpmMain import SpmMain
+from module.SpmSerial import SpmSerial
 from module.SpmAlarm import SpmAlarm
+from module.SpmSocketJSON import SpmSocketJSON
 
-def launch_sp():
-    SpmMain().start()
-    SpmSerial().start()
-    SpmAlarm().start()
-
-launch_sp()
+SpmMain().start()
+SpmSerial().start()
+SpmAlarm().start()
+SpmSocketJSON().start()

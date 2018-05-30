@@ -1,6 +1,6 @@
 from mysql import connector
 from enum import IntEnum
-import xml.etree.ElementTree as ET
+from Global import *
 
 class FetchType(IntEnum):
     ONE = 0,
@@ -9,8 +9,6 @@ class FetchType(IntEnum):
 
 
 class AbstractSQL:
-
-    PATH_CONFIG = 'lib/config.xml'
 
     @staticmethod
     def fetch_execute_one(query, params):
@@ -49,6 +47,5 @@ class AbstractSQL:
 
     @staticmethod
     def get_connection():
-        db = ET.parse(AbstractSQL.PATH_CONFIG).getroot()[0]
-        return connector.connect(user=db.find('user').text, passwd=db.find('passwd').text, host=db.find('host').text, db=db.find('db').text,
-                                 port=int(db.find('port').text))
+        return connector.connect(user=get_value_config('db', 'user'), passwd=get_value_config('db', 'passwd'), host=get_value_config('db', 'host'), db=get_value_config('db', 'db'),
+                                 port=int(get_value_config('db', 'port')))
