@@ -4,10 +4,12 @@ import json
 from time import sleep
 from lib.SPDbCall import SPDbCall
 from Global import *
+from lib.AccessLogger import AccessLogger
 
 class SpmSocketJSON(Thread):
 
     NAMEMODULE = 'Socket'
+    PATH_LOG = './log/socket.txt'
 
     def __init__(self):
         print(self.NAMEMODULE)
@@ -18,7 +20,7 @@ class SpmSocketJSON(Thread):
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             try:
-                host = get_value_config('socketconf', 'host')
+                host = ''
                 port = int(get_value_config('socketconf', 'port'))
                 s.bind((host, port))
                 s.listen(1)
@@ -29,13 +31,14 @@ class SpmSocketJSON(Thread):
 
     def clientthread(self, conn):
         print("Client connection")
-        count = 0
+        logger = AccessLogger(self.PATH_LOG)
         while True:
             try:
                 data = conn.recv(2048).decode("utf-8").strip()
+                logger.log(data)
                 json_rec = json.loads(data)
                 if not SpmSocketJSON.execute_json(json_rec):
-                    print("Error : "+str(json_rec))
+                    logger.log("Error : "+str(json_rec))
                     raise ValueError
             except:
                 conn.close()
@@ -71,5 +74,4 @@ class SpmSocketJSON(Thread):
                     print("update "+str(member['Name'])+","+str(member['Surname']))
                     return True
         except Exception:
-            print("error execute_json")
             return False
