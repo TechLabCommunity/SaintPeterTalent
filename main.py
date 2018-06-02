@@ -7,4 +7,4 @@ from module.SpmSocketJSON import SpmSocketJSON
 SpmMain().start()
 SpmSerial().start()
 SpmAlarm().start()
-#SpmSocketJSON().start()
+SpmSocketJSON().start()

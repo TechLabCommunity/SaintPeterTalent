@@ -2,6 +2,7 @@ from threading import Thread
 import socket
 import json
 from time import sleep
+from lib.SPDbCall import SPDbCall
 from Global import *
 
 class SpmSocketJSON(Thread):
@@ -26,21 +27,18 @@ class SpmSocketJSON(Thread):
                 print("Binding failed socket. Retry...")
                 sleep(1)
 
-    @staticmethod
-    def clientthread(conn):
+    def clientthread(self, conn):
         print("Client connection")
+        count = 0
         while True:
             try:
-                data = conn.recv(1024).decode("utf-8").strip()
+                data = conn.recv(2048).decode("utf-8").strip()
                 json_rec = json.loads(data)
-                print(json_rec)
-                #TODO
-                conn.close()
-                print("Client close")
-                break
+                if not SpmSocketJSON.execute_json(json_rec):
+                    print("Error : "+str(json_rec))
+                    raise ValueError
             except:
                 conn.close()
-                print("Client close with exception")
                 break
 
     def run(self):
@@ -54,3 +52,24 @@ class SpmSocketJSON(Thread):
             except:
                 jsock = self.get_binding_socket()
                 pass
+
+    @staticmethod
+    def execute_json(json_req):
+        try:
+            if "token" in json_req and json_req['token'] == get_value_config('socketconf', 'token'):
+                if "type_request" not in json_req or json_req["type_request"] not in ['save']:
+                    return False
+                if json_req['type_request'] == 'save':
+                    #TODO backup, log.
+                    table_name = json_req['table_name']
+                    member = json_req['member']
+                    talent_code = SPDbCall.exists_talent_code(member['TalentCode'])
+                    if talent_code is None:
+                        SPDbCall.insert_member(table_name, member)
+                    else:
+                        SPDbCall.update_accesscode(table_name, member['AccessCode'], member['TalentCode'])
+                    print("update "+str(member['Name'])+","+str(member['Surname']))
+                    return True
+        except Exception:
+            print("error execute_json")
+            return False

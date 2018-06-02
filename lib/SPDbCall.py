@@ -189,5 +189,38 @@ class SPDbCall:
         rows = AbstractSQL.fetch_execute_all(query, ())
         return rows
 
+    @staticmethod
+    def insert_member(table_name, member):
+        if table_name is None or member is None:
+            return False
+        query = AbstractSQL.get_query_by_name('INSERT_MEMBER_TABLE').replace('table_name', table_name)
+        AbstractSQL.execute_commit(query,
+                                   (table_name,
+                                    member['Name'],
+                                    member['Surname'],
+                                    member['MemberType'],
+                                    member['ReferenceZone'],
+                                    member['AccessCode'],
+                                    member['IsActive'],
+                                    member['TalentCode'],
+                                    member['Username'],
+                                    member['Password'],
+                                    member['FirstEmail'],
+                                    member['FiscalCode']
+                                    )
+                                   )
+        return True
 
+    @staticmethod
+    def update_accesscode(table_name, access_code, talent_code):
+        if table_name is None or talent_code is None or access_code is None:
+            return False
+        query = AbstractSQL.get_query_by_name('UPDATE_ACCESSCODE').replace('table_name', table_name)
+        AbstractSQL.execute_commit(query, (access_code, talent_code))
+        return True
+
+    @staticmethod
+    def exists_talent_code(talent_code):
+        query = AbstractSQL.get_query_by_name('EXISTS_TALENTCODE')
+        return AbstractSQL.fetch_execute_one(query, (talent_code,))
 
