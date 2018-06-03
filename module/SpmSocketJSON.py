@@ -1,60 +1,43 @@
 from threading import Thread
-import socket
 import json
-from time import sleep
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from lib.SPDbCall import SPDbCall
 from Global import *
 from lib.AccessLogger import AccessLogger
 
-class SpmSocketJSON(Thread):
+class S(BaseHTTPRequestHandler):
 
-    NAMEMODULE = 'Socket'
-    PATH_LOG = './log/socket.txt'
 
-    def __init__(self):
-        print(self.NAMEMODULE)
-        Thread.__init__(self)
+    PATH_LOG = './log/httplog.txt'
+    logger = AccessLogger(PATH_LOG)
 
-    def get_binding_socket(self):
-        while True:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            try:
-                host = ''
-                port = int(get_value_config('socketconf', 'port'))
-                s.bind((host, port))
-                s.listen(1)
-                return s
-            except:
-                print("Binding failed socket. Retry...")
-                sleep(1)
+    def setup(self):
+        BaseHTTPRequestHandler.setup(self)
+        self.request.settimeout(2)
 
-    def clientthread(self, conn):
-        print("Client connection")
-        logger = AccessLogger(self.PATH_LOG)
-        while True:
-            try:
-                data = conn.recv(2048).decode("utf-8").strip()
-                logger.log(data)
-                json_rec = json.loads(data)
-                if not SpmSocketJSON.execute_json(json_rec):
-                    logger.log("Error : "+str(json_rec))
-                    raise ValueError
-            except:
-                conn.close()
-                break
 
-    def run(self):
-        jsock = self.get_binding_socket()
-        while True:
-            try:
-                conn, addr = jsock.accept()
-                conn.settimeout(5)
-                print('Connected with ' + addr[0] + ':' + str(addr[1]))
-                Thread(target=self.clientthread, args = (conn,)).start()
-            except:
-                jsock = self.get_binding_socket()
-                pass
+    def _set_headers(self, error=False):
+        self.send_response(500 if error else 200)
+        self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', 'https://gestionale.talentlabpadova.org')
+        self.end_headers()
+
+    def do_POST(self):
+
+        try:
+            data_string = self.rfile.read(int(self.headers['Content-Length'])).decode('utf-8').strip().replace('\r', '').replace('\n','').replace('\t', '')
+            self.logger.log("Rec : "+data_string)
+            json_rec = json.loads(data_string)
+            if not self.execute_json(json_rec):
+                raise ValueError('JSON is not valid.')
+            ok_resp = {'response' : True}
+            self._set_headers()
+            self.wfile.write(str(json.dumps(ok_resp, ensure_ascii=False)).encode("utf-8"))
+            self.logger.log("Response : OK")
+        except:
+            self.logger.log("Response : FAIL")
+            self._set_headers(True)
+        return
 
     @staticmethod
     def execute_json(json_req):
@@ -75,3 +58,22 @@ class SpmSocketJSON(Thread):
                     return True
         except Exception:
             return False
+
+class SpmSocketJSON(Thread):
+
+    NAMEMODULE = "HttpServer"
+
+    def __init__(self):
+        print(self.NAMEMODULE)
+        Thread.__init__(self)
+
+    def run(self):
+        port = int(get_value_config("socketconf", "port"))
+        server_address = ('', port)
+        httpd = HTTPServer(server_address, S)
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            pass
+        httpd.server_close()
+
