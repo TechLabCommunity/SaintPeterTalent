@@ -11,8 +11,8 @@
         <code>9877890</code>
     </emptyjail>
     <socketconf>
-        <host>127.0.0.1</host>
-        <port>6113</port>
+        <urlrequest>https://gestionale.talentlabpadova.org/api/request</urlrequest>
         <token>178e9e6d04c9c1bd3c831f089eb726ff</token>
+        <timeout>300</timeout>
     </socketconf>
 </main>

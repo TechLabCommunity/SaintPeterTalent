@@ -195,7 +195,7 @@ class SPDbCall:
             return False
         query = AbstractSQL.get_query_by_name('INSERT_MEMBER_TABLE').replace('table_name', table_name)
         AbstractSQL.execute_commit(query,
-                                   (table_name,
+                                   (
                                     member['Name'],
                                     member['Surname'],
                                     member['MemberType'],
