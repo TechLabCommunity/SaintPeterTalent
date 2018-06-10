@@ -4,7 +4,7 @@ from module.SpmSerial import SpmSerial
 from module.SpmAlarm import SpmAlarm
 from module.SpmUpdateAccessCode import SpmUpdateAccessCode
 
-# SpmMain().start()
-# SpmSerial().start()
-# SpmAlarm().start()
+SpmMain().start()
+SpmSerial().start()
+SpmAlarm().start()
 SpmUpdateAccessCode().start()
