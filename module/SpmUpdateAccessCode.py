@@ -13,32 +13,40 @@ class SpmUpdateAccessCode(Thread):
 
     def __init__(self):
         print(self.NAMEMODULE)
+        self.logger = AccessLogger(self.PATH_LOG)
         Thread.__init__(self)
 
     def run(self):
-        logger = AccessLogger(self.PATH_LOG)
+        while True:
+            try:
+                for controller in ("TalentMembers", "OldMembersAccesses"):
+                    self.update_table(controller)
+                sleep(int(get_value_config("socketconf", "timeout")))
+                self.logger.log('End. Ready to restart! Waiting : ' + str(get_value_config("socketconf", "timeout")))
+            except:
+                pass
+
+    def update_table(self, controller):
         delta = 1
         while True:
             try:
-                logger.log("Starting update...")
+                self.logger.log("Starting update "+str(controller))
                 json_send = {
                     "token": get_value_config("socketconf", "token"),
-                    "entity": "TalentMembers",
+                    "entity": controller,
                     "type_request": "query",
-                    "range": [0+delta-1, 9+delta]
+                    "range": [0 + delta - 1, 9 + delta]
                 }
                 request = requests.post(get_value_config("socketconf", "urlrequest"), json=json_send)
-                logger.log('from %s to %s' % (0+delta-1, 9+delta))
+                self.logger.log('from %s to %s' % (0 + delta - 1, 9 + delta))
                 json_resp = json.loads(request.text)
                 SpmUpdateAccessCode.execute_json(json_resp)
                 if not json_resp['response']:
-                    logger.log('End. Ready to restart! Waiting : '+str(get_value_config("socketconf", "timeout")))
-                    delta = 0
-                    sleep(int(get_value_config("socketconf", "timeout")))
-                    continue
+                    break
                 delta = delta + 10
             except:
-                logger.log("Error in update.")
+                self.logger.log("Error in update.")
+                pass
 
 
     @staticmethod
