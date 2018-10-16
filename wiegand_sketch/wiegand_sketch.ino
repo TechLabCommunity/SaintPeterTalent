@@ -4,11 +4,13 @@
 #include <avr/wdt.h>
 #define N_PINS 3
 #define DOOR_PIN 12
+#define MAGIC_NUMBER XXXXXX //complete
 
 
 const unsigned PINS[N_PINS] = {4,5,6};
 WIEGAND wg;
 volatile unsigned int count_res = 0;
+unsigned long code = 0;
 
 void turn_off(){
   for (int i=0; i<N_PINS; i++){
@@ -35,7 +37,7 @@ void setup() {
 void loop() {
   if (wg.available())
   {
-    unsigned long code = wg.getCode();
+    code = wg.getCode();
     if (code > 999) {
       Serial.println(String(code) + "#");
     }
@@ -51,8 +53,9 @@ void loop() {
         count_res++;
       case 's':
         count_res++;
-        if (count_res == 1){
+        if (count_res == 1 || code == MAGIC_NUMBER){
           digitalWrite(DOOR_PIN, HIGH);
+          code = 0;
         }
         count_res = 0;
       case 'a':
