@@ -1,0 +1,6 @@
+{
+    "terminal.integrated.env.linux": {
+        "PATH": "/home/keyro90/.platformio/penv/bin:/home/keyro90/.platformio/penv:/home/keyro90/bin:/home/keyro90/.local/bin:/home/keyro90/bin:/home/keyro90/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/keyro90/.dotnet/tools:/home/keyro90/.dotnet/tools",
+        "PLATFORMIO_CALLER": "vscode"
+    }
+}

@@ -46,7 +46,15 @@ class SpmMain(Thread):
                                 SPDbCall.insert_request_alarm(str(al[0]), alarm_status)
                         logger.log('Code valid but there is anomaly : ' + str(member_type))
                     logger.log('%s, %s, %s, %s, %s' % (name, surname, talent_code, type_enter, code))
-                    SPDbCall.insert_request_serial(char_send)
+                    if name is None:
+                        name = ""
+                    if surname is None:
+                        surname = ""
+                    if code is None:
+                        code = ""
+                    info_send = '|'.join([char_send.decode("utf-8") , name, surname, str(int(type_enter)), str(code)])
+                    SPDbCall.insert_request_serial(info_send)
                 sleep(0.1)
             except Exception as e:
+                print("Exception : " + str(e))
                 logger.log("Exception : " + str(e))
