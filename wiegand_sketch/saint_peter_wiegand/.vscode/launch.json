@@ -1,0 +1,32 @@
+// AUTOMATICALLY GENERATED FILE. PLEASE DO NOT MODIFY IT MANUALLY
+
+// PIO Unified Debugger
+//
+// Documentation: https://docs.platformio.org/page/plus/debugging.html
+// Configuration: https://docs.platformio.org/page/projectconf/section_env_debug.html
+
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug",
+            "executable": "/home/keyro90/Documenti/Progetti/SaintPeterTalent/wiegand_sketch/saint_peter_wiegand/.pioenvs/uno/firmware.elf",
+            "toolchainBinDir": "/home/keyro90/.platformio/packages/toolchain-atmelavr/bin",
+            "preLaunchTask": {
+                "type": "PlatformIO",
+                "task": "Pre-Debug"
+            },
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug (skip Pre-Debug)",
+            "executable": "/home/keyro90/Documenti/Progetti/SaintPeterTalent/wiegand_sketch/saint_peter_wiegand/.pioenvs/uno/firmware.elf",
+            "toolchainBinDir": "/home/keyro90/.platformio/packages/toolchain-atmelavr/bin",
+            "internalConsoleOptions": "openOnSessionStart"
+        }
+    ]
+}
