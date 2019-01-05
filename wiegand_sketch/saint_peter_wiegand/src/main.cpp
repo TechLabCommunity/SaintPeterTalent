@@ -13,7 +13,7 @@
 typedef struct
 {
   char action;
-  String name = "", surname = "", code = "";
+  String name = "", surname = "", code = "", alarm_status = "", custom_message = "";
   uint8_t type_enter = 0;
 } InfoMember;
 
@@ -45,7 +45,7 @@ void setup()
   pinMode(DOOR_PIN, OUTPUT);
   digitalWrite(DOOR_PIN, LOW);
   wg.begin();
-  MsTimer2::set(4000, turn_off);
+  MsTimer2::set(5000, turn_off);
   screen.clear();
   delay(2000);
 }
@@ -77,23 +77,24 @@ void loop()
     bool is_valid_action = true;
     InfoMember *member = get_infos(response);
     String compound_rows[4];
+    compound_rows[0] = String("Cod: ") + String(member->code);
     switch (member->action)
     {
     case 'c':
-      compound_rows[0] = "Errore di vincolo";
+      compound_rows[1] = "Errore di vincolo";
       compound_rows[2] = "ACCESSO NEGATO";
       break;
     case 'b':
-      compound_rows[0] = "Codice errato";
+      compound_rows[1] = "Codice errato";
       compound_rows[2] = "RIPROVARE";
       break;
     case 's':
       digitalWrite(DOOR_PIN, HIGH);
-      compound_rows[0] = "Codice valido";
+      compound_rows[1] = "Codice valido";
       compound_rows[2] = "ENTRATA";
       break;
     case 'a':
-      compound_rows[0] = "Codice valido";
+      compound_rows[1] = "Codice valido";
       compound_rows[2] = "USCITA";
       break;
     default:
@@ -102,8 +103,22 @@ void loop()
     }
     if (is_valid_action)
     {
-      compound_rows[1] = String(member->code);
-      compound_rows[3] = member->name + String(" ") + member->surname;
+      if (member->alarm_status == "1")
+      {
+        compound_rows[2] = "ALLARME ATTIVATO";
+      }
+      else if (member->alarm_status == "2")
+      {
+        compound_rows[2] = "ALLARME DISATTIVATO";
+      }
+      else
+      {
+        compound_rows[2] = "";
+      }
+      if (member->custom_message.length() > 0)
+      {
+        compound_rows[3] = member->custom_message;
+      }
     }
     else
     {
@@ -145,6 +160,13 @@ InfoMember *get_infos(String response, char delimiter)
       break;
     case 4:
       member->code += response[i];
+      break;
+    case 5:
+      member->alarm_status += response[i];
+      break;
+    case 6:
+      member->custom_message += response[i];
+      break;
     }
     i++;
   }

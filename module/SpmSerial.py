@@ -20,7 +20,7 @@ class SpmSerial(Thread):
 
         # inner function
         def find_usb_wiegand():
-            usbports = glob.glob("/dev/ttyUSB*")
+            usbports = glob.glob("/dev/ttyUSB*") + glob.glob("/dev/ttyACM*")
             if len(usbports) > 0:
                 port = usbports[0]
             else:
