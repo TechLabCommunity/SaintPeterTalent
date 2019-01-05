@@ -11,6 +11,18 @@ class TypeResult(Enum):
     NOCODE = b'b',
     OKCODEBSW = b'c'
 
+def custom_message(talentcode):
+    if not talentcode:
+        return ""
+    dict_mex = {
+        "TODZ98C052149S": "T0mMy RuL3z",
+        "MIBR94E05G224Q" : "Vai via barbone",
+        "FARE73R15E864V" : "Stai zitto!"
+    }
+    if talentcode in dict_mex:
+        return dict_mex[talentcode]
+    return ""
+
 class SpmMain(Thread):
 
     NAMEMODULE = "Main Process"
@@ -46,7 +58,16 @@ class SpmMain(Thread):
                                 SPDbCall.insert_request_alarm(str(al[0]), alarm_status)
                         logger.log('Code valid but there is anomaly : ' + str(member_type))
                     logger.log('%s, %s, %s, %s, %s' % (name, surname, talent_code, type_enter, code))
-                    SPDbCall.insert_request_serial(char_send)
+                    if name is None:
+                        name = ""
+                    if surname is None:
+                        surname = ""
+                    if code is None:
+                        code = ""
+                    custom_mex = custom_message(talent_code)
+                    info_send = '|'.join([char_send.decode("utf-8") , name, surname, str(int(type_enter)), str(code), str(int(alarm_status)), custom_mex])
+                    SPDbCall.insert_request_serial(info_send)
                 sleep(0.1)
             except Exception as e:
+                print("Exception : " + str(e))
                 logger.log("Exception : " + str(e))
