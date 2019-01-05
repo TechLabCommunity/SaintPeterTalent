@@ -65,7 +65,7 @@ class SpmMain(Thread):
                     if code is None:
                         code = ""
                     custom_mex = custom_message(talent_code)
-                    info_send = '|'.join([char_send.decode("utf-8") , name, surname, str(int(type_enter)), str(code), str(int(alarm_status)), custom_mex])
+                    info_send = '|'.join([char_send.decode("utf-8") , name, surname, str(int(type_enter)), "", str(int(alarm_status)), custom_mex])
                     SPDbCall.insert_request_serial(info_send)
                 sleep(0.1)
             except Exception as e:

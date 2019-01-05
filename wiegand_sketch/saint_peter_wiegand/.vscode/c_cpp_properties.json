@@ -5,9 +5,10 @@
             "name": "Linux",
             "includePath": [
                 "/home/keyro90/.platformio/packages/framework-arduinoavr/cores/arduino",
-                "/home/keyro90/.platformio/packages/framework-arduinoavr/variants/standard",
+                "/home/keyro90/.platformio/packages/framework-arduinoavr/variants/eightanaloginputs",
                 "/home/keyro90/Documenti/Progetti/SaintPeterTalent/wiegand_sketch/saint_peter_wiegand/lib/LiquidCrystal_I2C",
                 "/home/keyro90/Documenti/Progetti/SaintPeterTalent/wiegand_sketch/saint_peter_wiegand/lib/Wiegand",
+                "/home/keyro90/.platformio/lib/MsTimer2_ID137",
                 "/home/keyro90/.platformio/packages/framework-arduinoavr/libraries/__cores__/arduino/Wire/src",
                 "/home/keyro90/.platformio/lib/ArduinoJson_ID64/src",
                 "/home/keyro90/.platformio/packages/framework-arduinoavr/libraries/__cores__/arduino/EEPROM/src",
@@ -45,9 +46,10 @@
                 "databaseFilename": "${workspaceRoot}/.vscode/.browse.c_cpp.db",
                 "path": [
                     "/home/keyro90/.platformio/packages/framework-arduinoavr/cores/arduino",
-                    "/home/keyro90/.platformio/packages/framework-arduinoavr/variants/standard",
+                    "/home/keyro90/.platformio/packages/framework-arduinoavr/variants/eightanaloginputs",
                     "/home/keyro90/Documenti/Progetti/SaintPeterTalent/wiegand_sketch/saint_peter_wiegand/lib/LiquidCrystal_I2C",
                     "/home/keyro90/Documenti/Progetti/SaintPeterTalent/wiegand_sketch/saint_peter_wiegand/lib/Wiegand",
+                    "/home/keyro90/.platformio/lib/MsTimer2_ID137",
                     "/home/keyro90/.platformio/packages/framework-arduinoavr/libraries/__cores__/arduino/Wire/src",
                     "/home/keyro90/.platformio/lib/ArduinoJson_ID64/src",
                     "/home/keyro90/.platformio/packages/framework-arduinoavr/libraries/__cores__/arduino/EEPROM/src",
@@ -85,7 +87,7 @@
                 "F_CPU=16000000L",
                 "PLATFORMIO=30603",
                 "ARDUINO_ARCH_AVR",
-                "ARDUINO_AVR_UNO",
+                "ARDUINO_AVR_NANO",
                 "ARDUINO=10619",
                 "__AVR_ATmega328P__",
                 ""
