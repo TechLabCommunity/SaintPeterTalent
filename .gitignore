@@ -13,3 +13,5 @@ __pycache__/
 *.db-wal
 
 wiegand_sketch/saint_peter_wiegand/\.pioenvs/
+
+wiegand_sketch/saint_peter_wiegand/\.vscode/
