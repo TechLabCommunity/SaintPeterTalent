@@ -11,3 +11,5 @@ __pycache__/
 *.db-shm
 
 *.db-wal
+
+wiegand_sketch/saint_peter_wiegand/\.pioenvs/

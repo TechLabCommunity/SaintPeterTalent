@@ -17,7 +17,8 @@ def custom_message(talentcode):
     dict_mex = {
         "TODZ98C052149S": "T0mMy RuL3z",
         "MIBR94E05G224Q" : "Vai via barbone",
-        "FARE73R15E864V" : "Stai zitto!"
+        "FARE73R15E864V" : "Stai zitto!",
+        "EMPTYJAIL" : "***SVUOTA CARCERI***"
     }
     if talentcode in dict_mex:
         return dict_mex[talentcode]

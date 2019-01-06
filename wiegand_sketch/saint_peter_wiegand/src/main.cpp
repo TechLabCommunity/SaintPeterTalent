@@ -45,7 +45,7 @@ void setup()
   pinMode(DOOR_PIN, OUTPUT);
   digitalWrite(DOOR_PIN, LOW);
   wg.begin();
-  MsTimer2::set(5000, turn_off);
+  MsTimer2::set(6000, turn_off);
   screen.clear();
   delay(2000);
 }
@@ -77,25 +77,24 @@ void loop()
     bool is_valid_action = true;
     InfoMember *member = get_infos(response);
     String compound_rows[4];
-    compound_rows[0] = String("Cod: ") + String(member->code);
     switch (member->action)
     {
     case 'c':
-      compound_rows[1] = "Errore di vincolo";
-      compound_rows[2] = "ACCESSO NEGATO";
+      compound_rows[0] = "Errore di vincolo";
+      compound_rows[1] = "--ACCESSO NEGATO--";
       break;
     case 'b':
-      compound_rows[1] = "Codice errato";
-      compound_rows[2] = "RIPROVARE";
+      compound_rows[0] = "Codice errato";
+      compound_rows[1] = "--RIPROVARE--";
       break;
     case 's':
       digitalWrite(DOOR_PIN, HIGH);
-      compound_rows[1] = "Codice valido";
-      compound_rows[2] = "ENTRATA";
+      compound_rows[0] = "Codice valido";
+      compound_rows[1] = "--ENTRATA--";
       break;
     case 'a':
-      compound_rows[1] = "Codice valido";
-      compound_rows[2] = "USCITA";
+      compound_rows[0] = "Codice valido";
+      compound_rows[1] = "--USCITA--";
       break;
     default:
       is_valid_action = false;
@@ -105,11 +104,11 @@ void loop()
     {
       if (member->alarm_status == "1")
       {
-        compound_rows[2] = "ALLARME ATTIVATO";
+        compound_rows[2] = "ALLARME ON";
       }
       else if (member->alarm_status == "2")
       {
-        compound_rows[2] = "ALLARME DISATTIVATO";
+        compound_rows[2] = "ALLARME OFF";
       }
       else
       {
