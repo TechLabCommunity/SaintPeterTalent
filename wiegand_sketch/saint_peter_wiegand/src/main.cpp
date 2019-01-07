@@ -33,7 +33,7 @@ void turn_off()
   yet_print = false;
 }
 
-InfoMember *get_infos(String response, char delimiter = '|');
+InfoMember get_infos(String response, char delimiter = '|');
 
 void screen_print(String *rows, uint8_t length);
 
@@ -75,9 +75,9 @@ void loop()
   if (response.length() > 0)
   {
     bool is_valid_action = true;
-    InfoMember *member = get_infos(response);
+    InfoMember member = get_infos(response);
     String compound_rows[4];
-    switch (member->action)
+    switch (member.action)
     {
     case 'c':
       compound_rows[0] = "Errore di vincolo";
@@ -102,11 +102,11 @@ void loop()
     }
     if (is_valid_action)
     {
-      if (member->alarm_status == "1")
+      if (member.alarm_status == "1")
       {
         compound_rows[2] = "ALLARME ON";
       }
-      else if (member->alarm_status == "2")
+      else if (member.alarm_status == "2")
       {
         compound_rows[2] = "ALLARME OFF";
       }
@@ -114,9 +114,9 @@ void loop()
       {
         compound_rows[2] = "";
       }
-      if (member->custom_message.length() > 0)
+      if (member.custom_message.length() > 0)
       {
-        compound_rows[3] = member->custom_message;
+        compound_rows[3] = member.custom_message;
       }
     }
     else
@@ -132,12 +132,12 @@ void loop()
   }
 }
 
-InfoMember *get_infos(String response, char delimiter)
+InfoMember get_infos(String response, char delimiter)
 {
   unsigned int i = 0;
   int col = 0;
-  InfoMember *member = new InfoMember();
-  member->action = response[0];
+  InfoMember member;
+  member.action = response[0];
   while (i < response.length() && response[i] != '\n')
   {
     if (response[i] == delimiter)
@@ -149,22 +149,22 @@ InfoMember *get_infos(String response, char delimiter)
     switch (col)
     {
     case 1:
-      member->name += response[i];
+      member.name += response[i];
       break;
     case 2:
-      member->surname += response[i];
+      member.surname += response[i];
       break;
     case 3:
-      member->type_enter = ((String)response[i]).toInt();
+      member.type_enter = ((String)response[i]).toInt();
       break;
     case 4:
-      member->code += response[i];
+      member.code += response[i];
       break;
     case 5:
-      member->alarm_status += response[i];
+      member.alarm_status += response[i];
       break;
     case 6:
-      member->custom_message += response[i];
+      member.custom_message += response[i];
       break;
     }
     i++;
