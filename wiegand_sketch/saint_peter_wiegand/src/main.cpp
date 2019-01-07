@@ -5,7 +5,7 @@
 #include <avr/wdt.h>
 #include <LiquidCrystal_I2C.h>
 #define DOOR_PIN 12
-#define MAGIC_NUMBER 2708801 //complete
+#define MAGIC_NUMBER XXXXXX //complete
 #define COLS 20
 #define ROWS 4
 #define ADDR_I2C 0x27
