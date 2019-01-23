@@ -5,10 +5,18 @@
 #include <avr/wdt.h>
 #include <LiquidCrystal_I2C.h>
 #define DOOR_PIN 12
-#define MAGIC_NUMBER XXXXXX //complete
 #define COLS 20
 #define ROWS 4
 #define ADDR_I2C 0x27
+#define SEPARATOR '|'
+#define TIMEOUT_WAIT 6000
+
+#ifndef MAGIC_NUMBER
+#define MAGIC_NUMBER 0 //define into platformio.ini
+#endif
+#define STATUS_MEMORY_CODE 999998
+
+#define RESPONSE_BYPASS "s||||||BYPASS|0"
 
 typedef struct
 {
@@ -24,6 +32,8 @@ unsigned int count_res = 0;
 unsigned long code = 0;
 LiquidCrystal_I2C screen(ADDR_I2C, COLS, ROWS);
 String response = "";
+String rows_composite[] = {"TalentLab CA", "", "In funzione"};
+String compound_rows[4];
 
 void turn_off()
 {
@@ -33,9 +43,16 @@ void turn_off()
   yet_print = false;
 }
 
-InfoMember get_infos(String response, char delimiter = '|');
+int freeRam()
+{
+  extern int __heap_start, *__brkval;
+  int v;
+  return (int)&v - (__brkval == 0 ? (int)&__heap_start : (int)__brkval);
+}
 
-void screen_print(String *rows, uint8_t length);
+InfoMember get_infos(String response, char delimiter = SEPARATOR);
+
+void screen_print(const String *rows, uint8_t length);
 
 void setup()
 {
@@ -45,8 +62,9 @@ void setup()
   pinMode(DOOR_PIN, OUTPUT);
   digitalWrite(DOOR_PIN, LOW);
   wg.begin();
-  MsTimer2::set(6000, turn_off);
+  MsTimer2::set(TIMEOUT_WAIT, turn_off);
   screen.clear();
+  Serial.println(MAGIC_NUMBER);
   delay(2000);
 }
 
@@ -54,14 +72,17 @@ void loop()
 {
   if (is_finished && !yet_print)
   {
-    String rows_composite[] = {"TalentLab CA", "", "In funzione"};
+    rows_composite[0] = "TalentLab CA";
+    rows_composite[1] = "";
+    rows_composite[2] = "In funzione";
+    rows_composite[3] = "";
     screen_print(rows_composite, 3);
     yet_print = true;
   }
   if (wg.available())
   {
     code = wg.getCode();
-    if (code > 999)
+    if (code > 999 && code != MAGIC_NUMBER && code != STATUS_MEMORY_CODE)
     {
       Serial.println(String(code) + "#");
     }
@@ -72,11 +93,18 @@ void loop()
     response = Serial.readString();
     response.trim();
   }
+  else if (code == MAGIC_NUMBER)
+  {
+    response = RESPONSE_BYPASS;
+  }
+  else if (code == STATUS_MEMORY_CODE)
+  {
+    response = String("b|||||") + String("|") + String(freeRam()) + String("|") + "0";
+  }
   if (response.length() > 0)
   {
     bool is_valid_action = true;
     InfoMember member = get_infos(response);
-    String compound_rows[4];
     switch (member.action)
     {
     case 'c':
@@ -118,17 +146,19 @@ void loop()
       {
         compound_rows[3] = member.custom_message;
       }
+      screen_print(compound_rows, 4);
+      is_finished = false;
+      MsTimer2::start();
     }
     else
     {
-      String not_valid[] = {"Azione non valida"};
-      screen_print(not_valid, 1);
+      compound_rows[1] = compound_rows[2] = compound_rows[3] = "";
+      compound_rows[0] = {"Azione non valida"};
+      screen_print(compound_rows, 1);
     }
-    screen_print(compound_rows, 4);
-    is_finished = false;
-    MsTimer2::start();
     response = "";
     code = 0;
+    compound_rows[0] = compound_rows[1] = compound_rows[2] = compound_rows[3] = "";
   }
 }
 
@@ -172,7 +202,7 @@ InfoMember get_infos(String response, char delimiter)
   return member;
 }
 
-void screen_print(String *rows, uint8_t length)
+void screen_print(const String *rows, uint8_t length)
 {
   if (length == 0)
     return;

@@ -15,3 +15,5 @@ __pycache__/
 wiegand_sketch/saint_peter_wiegand/\.pioenvs/
 
 wiegand_sketch/saint_peter_wiegand/\.vscode/
+
+wiegand_sketch/saint_peter_wiegand/platformio\.ini
