@@ -70,7 +70,6 @@ void setup()
   wg.begin();
   MsTimer2::set(TIMEOUT_WAIT, turn_off);
   screen.clear();
-  Serial.println(MAGIC_NUMBER);
 }
 
 void loop()
