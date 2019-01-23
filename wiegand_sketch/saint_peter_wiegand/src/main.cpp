@@ -9,7 +9,12 @@
 #define ROWS 4
 #define ADDR_I2C 0x27
 #define SEPARATOR '|'
-#define TIMEOUT_WAIT 6000
+#define TIMEOUT_WAIT 4000
+#define Reset_AVR()      \
+  wdt_enable(WDTO_30MS); \
+  while (1)              \
+  {                      \
+  }
 
 #ifndef MAGIC_NUMBER
 #define MAGIC_NUMBER 0 //define into platformio.ini
@@ -41,6 +46,7 @@ void turn_off()
   MsTimer2::stop();
   is_finished = true;
   yet_print = false;
+  Reset_AVR();
 }
 
 int freeRam()
@@ -65,7 +71,6 @@ void setup()
   MsTimer2::set(TIMEOUT_WAIT, turn_off);
   screen.clear();
   Serial.println(MAGIC_NUMBER);
-  delay(2000);
 }
 
 void loop()
