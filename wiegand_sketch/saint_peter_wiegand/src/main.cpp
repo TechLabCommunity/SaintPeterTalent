@@ -1,6 +1,7 @@
 #include <Arduino.h>
-#include <MsTimer2.h>
 #include <Wiegand.h>
+#include <Wire.h>
+#include <MsTimer2.h>
 #include <avr/io.h>
 #include <avr/wdt.h>
 #include <LiquidCrystal_I2C.h>
@@ -9,7 +10,8 @@
 #define ROWS 4
 #define ADDR_I2C 0x27
 #define SEPARATOR '|'
-#define TIMEOUT_WAIT 4000
+#define TIMEOUT_WAIT 5000
+#define TIME_RESET_LCD 15 * 60 * 1000
 #define Reset_AVR()      \
   wdt_enable(WDTO_30MS); \
   while (1)              \
@@ -31,23 +33,11 @@ typedef struct
 } InfoMember;
 
 WIEGAND wg;
-volatile bool is_finished = true;
-volatile bool yet_print = false;
 unsigned int count_res = 0;
 unsigned long code = 0;
-LiquidCrystal_I2C screen(ADDR_I2C, COLS, ROWS);
 String response = "";
-String rows_composite[] = {"TalentLab CA", "", "In funzione"};
-String compound_rows[4];
-
-void turn_off()
-{
-  digitalWrite(DOOR_PIN, LOW);
-  MsTimer2::stop();
-  is_finished = true;
-  yet_print = false;
-  Reset_AVR();
-}
+LiquidCrystal_I2C lcd(0x27, 20, 4);
+volatile bool need_reset_lcd = false;
 
 int freeRam()
 {
@@ -58,31 +48,32 @@ int freeRam()
 
 InfoMember get_infos(String response, char delimiter = SEPARATOR);
 
-void screen_print(const String *rows, uint8_t length);
+void print_rows(String s1, String s2, String s3, String s4);
+
+void reset_lcd()
+{
+  need_reset_lcd = true;
+  Wire.end();
+  lcd.begin();
+  print_rows(String("    TalentLab CA"), String(""), String("    In funzione"), String(""));
+  need_reset_lcd = false;
+}
 
 void setup()
 {
   Serial.begin(9600);
-  screen.begin();
-  screen.backlight();
   pinMode(DOOR_PIN, OUTPUT);
   digitalWrite(DOOR_PIN, LOW);
   wg.begin();
-  MsTimer2::set(TIMEOUT_WAIT, turn_off);
-  screen.clear();
+  lcd.begin();
+  lcd.backlight();
+  print_rows(String("    TalentLab CA"), String(""), String("    In funzione"), String(""));
+  MsTimer2::set(TIME_RESET_LCD, reset_lcd);
+  MsTimer2::start();
 }
 
 void loop()
 {
-  if (is_finished && !yet_print)
-  {
-    rows_composite[0] = "TalentLab CA";
-    rows_composite[1] = "";
-    rows_composite[2] = "In funzione";
-    rows_composite[3] = "";
-    screen_print(rows_composite, 3);
-    yet_print = true;
-  }
   if (wg.available())
   {
     code = wg.getCode();
@@ -105,64 +96,43 @@ void loop()
   {
     response = String("b|||||") + String("|") + String(freeRam()) + String("|") + "0";
   }
-  if (response.length() > 0)
+  if (response.length() > 0 && !need_reset_lcd)
   {
-    bool is_valid_action = true;
     InfoMember member = get_infos(response);
+    String alarm_msg = "";
     switch (member.action)
     {
     case 'c':
-      compound_rows[0] = "Errore di vincolo";
-      compound_rows[1] = "--ACCESSO NEGATO--";
+      print_rows(String("ACCESSO NEGATO"), String("   ERRORE VINCOLO"), String("     NO PARTNER"), String(""));
       break;
     case 'b':
-      compound_rows[0] = "Codice errato";
-      compound_rows[1] = "--RIPROVARE--";
+      print_rows(String("    CODICE ERRATO"), String("    --RIPROVARE--"), member.custom_message, String(""));
       break;
     case 's':
+      if (member.alarm_status == "2")
+      {
+        alarm_msg = "     ALLARME OFF";
+      }
+      print_rows(String("   CODICE VALIDO"), String("    --ENTRATA--"), member.custom_message, String(alarm_msg));
       digitalWrite(DOOR_PIN, HIGH);
-      compound_rows[0] = "Codice valido";
-      compound_rows[1] = "--ENTRATA--";
       break;
     case 'a':
-      compound_rows[0] = "Codice valido";
-      compound_rows[1] = "--USCITA--";
-      break;
-    default:
-      is_valid_action = false;
-      break;
-    }
-    if (is_valid_action)
-    {
       if (member.alarm_status == "1")
       {
-        compound_rows[2] = "ALLARME ON";
+        alarm_msg = "     ALLARME ON";
       }
-      else if (member.alarm_status == "2")
-      {
-        compound_rows[2] = "ALLARME OFF";
-      }
-      else
-      {
-        compound_rows[2] = "";
-      }
-      if (member.custom_message.length() > 0)
-      {
-        compound_rows[3] = member.custom_message;
-      }
-      screen_print(compound_rows, 4);
-      is_finished = false;
-      MsTimer2::start();
-    }
-    else
-    {
-      compound_rows[1] = compound_rows[2] = compound_rows[3] = "";
-      compound_rows[0] = {"Azione non valida"};
-      screen_print(compound_rows, 1);
+      print_rows(String("   CODICE VALIDO"), String("     --USCITA--"), member.custom_message, String(alarm_msg));
+      break;
+    default:
+      break;
     }
     response = "";
     code = 0;
-    compound_rows[0] = compound_rows[1] = compound_rows[2] = compound_rows[3] = "";
+    delay(TIMEOUT_WAIT);
+    digitalWrite(DOOR_PIN, LOW);
+    Wire.end();
+    lcd.begin();
+    print_rows(String("    TalentLab CA"), String(""), String("    In funzione"), String(""));
   }
 }
 
@@ -172,7 +142,8 @@ InfoMember get_infos(String response, char delimiter)
   int col = 0;
   InfoMember member;
   member.action = response[0];
-  while (i < response.length() && response[i] != '\n')
+  int c = 0;
+  while (i < response.length() && response[i] != '\n' && c < 80)
   {
     if (response[i] == delimiter)
     {
@@ -202,35 +173,24 @@ InfoMember get_infos(String response, char delimiter)
       break;
     }
     i++;
+    c++;
   }
   return member;
 }
 
-void screen_print(const String *rows, uint8_t length)
+void print_rows(String s1, String s2, String s3, String s4)
 {
-  if (length == 0)
-    return;
-  uint8_t i = 0;
-  screen.clear();
-  screen.home();
-  uint8_t max_rows = min(length, COLS);
-  while (i < max_rows)
-  {
-    screen.setCursor(0, i);
-    String row_to_print = rows[i];
-    uint8_t n_spaces = (COLS - row_to_print.length()) / 2;
-    if (row_to_print.length() < COLS)
-    {
-      for (uint8_t j = 0; j < n_spaces; j++)
-      {
-        screen.print(" ");
-      }
-      screen.print(row_to_print);
-    }
-    else
-    {
-      screen.print(row_to_print.substring(COLS - 1));
-    }
-    i++;
-  }
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  s1.substring(0, 19);
+  lcd.print(s1);
+  lcd.setCursor(0, 1);
+  s2.substring(0, 19);
+  lcd.print(s2);
+  lcd.setCursor(0, 2);
+  s3.substring(0, 19);
+  lcd.print(s3);
+  lcd.setCursor(0, 3);
+  s4.substring(0, 19);
+  lcd.print(s4);
 }
